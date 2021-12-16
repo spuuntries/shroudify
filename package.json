@@ -8,9 +8,9 @@
   "license": "apache-2.0",
   "private": true,
   "dependencies": {
-    "chalk": "^4.x.x"
+    "chalk": "^4.0.0"
   },
   "engines": {
-    "node": "16.0.0"
+    "node": "^16.0.0"
   }
 }
