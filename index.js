@@ -25,6 +25,17 @@ function encode(
     writeFile: undefined,
   }
 ) {
+  (() => {
+    if (!options.cipher) {
+      options["cipher"] = "kek";
+    }
+    if (!options.rounds) {
+      options["rounds"] = 1;
+    }
+    if (!options.writeFile) {
+      options["writeFile"] = undefined;
+    }
+  })();
   let cipherArr,
     b64a =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".split(
@@ -53,7 +64,8 @@ function encode(
     return b64e
       .split("")
       .map((e) => cipherArr[b64a.indexOf(e)])
-      .join(" ");
+      .join(" ")
+      .trim();
   } else {
     try {
       fs.readFileSync(options.cipher);
