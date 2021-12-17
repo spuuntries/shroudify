@@ -2,6 +2,7 @@ const fs = require("fs"),
   chalk = require("chalk"),
   pkg = require("./package.json"),
   shuffleSeed = require("shuffle-seed"),
+  _ = require("lodash"),
   ciphs = fs.readdirSync("./ciphers");
 
 // Who uses console.log smh LMFAO
@@ -14,7 +15,7 @@ function logger(msg = "logging") {
  * @param {String|Buffer} input Data to encode.
  * @param {Object} options Options object.
  * @param {String} [options.cipher] Cipher to use, can be a path or a premade cipher.
- * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done.
+ * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done, useful for injecting dead data.
  * @param {any} [options.seed] Shuffling seed.
  * @param {String} [options.writeFile] Path to write to.
  * @return {String|Boolean} Encoded data or if it has written to file.
@@ -41,11 +42,14 @@ function encode(
     if (!options.writeFile) {
       options["writeFile"] = undefined;
     }
-    if (typeof options.rounds != "number") {
+    if (!_.isFinite(options.rounds)) {
       options["rounds"] = parseInt(options.rounds);
       if (options.rounds < 1) {
         options["rounds"] = 1;
       }
+    }
+    if (_.isObject(options.seed)) {
+      options["seed"] = JSON.stringify(options.seed);
     }
   })();
   let cipherArr,
@@ -72,6 +76,8 @@ function encode(
         if (i == 1) {
           if (Buffer.isBuffer(input)) {
             b64e = input.toString("base64");
+          } else if (_.isPlainObject(input)) {
+            b64e = Buffer.from(JSON.stringify(input)).toString("base64");
           } else {
             b64e = Buffer.from(input).toString("base64");
           }
@@ -106,6 +112,8 @@ function encode(
         if (i == 1) {
           if (Buffer.isBuffer(input)) {
             b64e = input.toString("base64");
+          } else if (_.isPlainObject(input)) {
+            b64e = Buffer.from(JSON.stringify(input)).toString("base64");
           } else {
             b64e = Buffer.from(input).toString("base64");
           }
