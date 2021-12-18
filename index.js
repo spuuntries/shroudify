@@ -67,14 +67,29 @@ function encode(
   if (ciphs.includes(options.cipher)) {
     try {
       cipherArr = shuffleSeed.shuffle(
-        fs
-          .readFileSync(`./ciphers/${options.cipher}`)
-          .toString("utf8")
-          .split("\r")
-          .join("")
-          .split("\n"),
+        _.compact(
+          fs
+            .readFileSync(`./ciphers/${options.cipher}`)
+            .toString("utf8")
+            .split("\r")
+            .join("")
+            .split("\n")
+        ),
         options.seed
       );
+
+      if (cipherArr.length < 64)
+        logger(
+          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+          Which is < 64
+          Continuing may not be good idea as it can lead to unpredictable performance`)
+        );
+      if (cipherArr.length > 64)
+        logger(
+          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+          Which is > 64  
+          Continuing may not be good idea as it can lead to unpredictable performance`)
+        );
 
       for (let i = 1; i <= options.rounds; i++) {
         if (i == 1) {
@@ -105,14 +120,29 @@ function encode(
   } else {
     try {
       cipherArr = shuffleSeed.shuffle(
-        fs
-          .readFileSync(options.cipher)
-          .toString("utf8")
-          .split("\r")
-          .join("")
-          .split("\n"),
+        _.compact(
+          fs
+            .readFileSync(options.cipher)
+            .toString("utf8")
+            .split("\r")
+            .join("")
+            .split("\n")
+        ),
         options.seed
       );
+
+      if (cipherArr.length < 64)
+        logger(
+          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+          Which is < 64
+          Continuing may not be good idea as it can lead to unpredictable performance`)
+        );
+      if (cipherArr.length > 64)
+        logger(
+          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+          Which is > 64  
+          Continuing may not be good idea as it can lead to unpredictable performance`)
+        );
 
       for (let i = 1; i <= options.rounds; i++) {
         if (i == 1) {
@@ -188,7 +218,7 @@ function decode(
   })();
 
   let cipherArr,
-    b64a = shuffleSeed.shuffle(
+    b64a = shuffleSeed.unshuffle(
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".split(
         ""
       ),
@@ -199,15 +229,30 @@ function decode(
 
   if (ciphs.includes(options.cipher)) {
     try {
-      cipherArr = shuffleSeed.shuffle(
-        fs
-          .readFileSync(`./ciphers/${options.cipher}`)
-          .toString("utf8")
-          .split("\r")
-          .join("")
-          .split("\n"),
+      cipherArr = shuffleSeed.unshuffle(
+        _.compact(
+          fs
+            .readFileSync(`./ciphers/${options.cipher}`)
+            .toString("utf8")
+            .split("\r")
+            .join("")
+            .split("\n")
+        ),
         options.seed
       );
+
+      if (cipherArr.length < 64)
+        logger(
+          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+          Which is < 64
+          Continuing may not be good idea as it can lead to unpredictable performance`)
+        );
+      if (cipherArr.length > 64)
+        logger(
+          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+          Which is > 64  
+          Continuing may not be good idea as it can lead to unpredictable performance`)
+        );
 
       for (let i = 1; i <= options.rounds; i++) {
         if (i == 1) {
@@ -238,16 +283,31 @@ function decode(
   } else {
     try {
       cipherArr = shuffleSeed.shuffle(
-        fs
-          .readFileSync(options.cipher)
-          .toString("utf8")
-          .split("\r")
-          .join("")
-          .split("\n"),
+        _.compact(
+          fs
+            .readFileSync(options.cipher)
+            .toString("utf8")
+            .split("\r")
+            .join("")
+            .split("\n")
+        ),
         options.seed
       );
 
-      b64e = input.split();
+      if (cipherArr.length < 64)
+        logger(
+          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+          Which is < 64
+          Continuing may not be good idea as it can lead to unpredictable performance`)
+        );
+      if (cipherArr.length > 64)
+        logger(
+          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+          Which is > 64  
+          Continuing may not be good idea as it can lead to unpredictable performance`)
+        );
+
+      input = input.split(" ").map((e) => b64a[cipherArr.indexOf(e)]);
 
       for (let i = 1; i <= options.rounds; i++) {
         if (i == 1) {
