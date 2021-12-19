@@ -218,18 +218,20 @@ function decode(
   })();
 
   let cipherArr,
-    b64a = shuffleSeed.unshuffle(
+    b64a = shuffleSeed.shuffle(
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".split(
         ""
       ),
       options.seed
     ),
+    /** Encoded data */
+    encoded,
     /** Base64 encoded data. */
     b64e = "";
 
   if (ciphs.includes(options.cipher)) {
     try {
-      cipherArr = shuffleSeed.unshuffle(
+      cipherArr = shuffleSeed.shuffle(
         _.compact(
           fs
             .readFileSync(`./ciphers/${options.cipher}`)
@@ -254,26 +256,28 @@ function decode(
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
 
+      if (Buffer.isBuffer(input)) {
+        encoded = input
+          .toString("utf8")
+          .split(" ")
+          .map((e) => b64a[cipherArr.indexOf(e)])
+          .join("");
+      } else {
+        encoded = input
+          .split(" ")
+          .map((e) => b64a[cipherArr.indexOf(e)])
+          .join("");
+      }
+
       for (let i = 1; i <= options.rounds; i++) {
         if (i == 1) {
-          if (Buffer.isBuffer(input)) {
-            b64e = input.toString("base64");
-          } else if (_.isPlainObject(input)) {
-            b64e = Buffer.from(JSON.stringify(input)).toString("base64");
-          } else {
-            b64e = Buffer.from(input).toString("base64");
-          }
+          b64e = Buffer.from(encoded, "base64").toString("utf8");
         } else {
-          b64e = Buffer.from(b64e).toString("base64");
+          b64e = Buffer.from(b64e, "base64").toString("utf8");
         }
       }
 
-      return b64e
-        .split("")
-        .map((e) => cipherArr[b64a.indexOf(e)])
-        .join(" ")
-        .trim()
-        .replace(/  +/g, " ");
+      return b64e;
     } catch (error) {
       logger(
         chalk.red.bold(`failed to decode!
@@ -307,28 +311,28 @@ function decode(
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
 
-      input = input.split(" ").map((e) => b64a[cipherArr.indexOf(e)]);
+      if (Buffer.isBuffer(input)) {
+        encoded = input
+          .toString("utf8")
+          .split(" ")
+          .map((e) => b64a[cipherArr.indexOf(e)])
+          .join("");
+      } else {
+        encoded = input
+          .split(" ")
+          .map((e) => b64a[cipherArr.indexOf(e)])
+          .join("");
+      }
 
       for (let i = 1; i <= options.rounds; i++) {
         if (i == 1) {
-          if (Buffer.isBuffer(input)) {
-            b64e = input.toString("base64");
-          } else if (_.isPlainObject(input)) {
-            b64e = Buffer.from(JSON.stringify(input)).toString("base64");
-          } else {
-            b64e = Buffer.from(input).toString("base64");
-          }
+          b64e = Buffer.from(encoded, "base64").toString("utf8");
         } else {
-          b64e = Buffer.from(b64e).toString("base64");
+          b64e = Buffer.from(b64e, "base64").toString("utf8");
         }
       }
 
-      return b64e
-        .split("")
-        .map((e) => cipherArr[b64a.indexOf(e)])
-        .join(" ")
-        .trim()
-        .replace(/  +/g, " ");
+      return b64e;
     } catch (error) {
       logger(
         chalk.red.bold(`failed to encode!
@@ -337,4 +341,5 @@ function decode(
     }
   }
 }
+
 module.exports = { encode, decode };
