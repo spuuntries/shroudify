@@ -78,16 +78,16 @@ function encode(
         options.seed
       );
 
-      if (cipherArr.length < 64)
+      if (cipherArr.length < 65)
         logger(
           chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is < 64
+          Which is < 65
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
-      if (cipherArr.length > 64)
+      if (cipherArr.length > 65)
         logger(
           chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is > 64  
+          Which is > 65  
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
 
@@ -131,16 +131,16 @@ function encode(
         options.seed
       );
 
-      if (cipherArr.length < 64)
+      if (cipherArr.length < 65)
         logger(
           chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is < 64
+          Which is < 65
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
-      if (cipherArr.length > 64)
+      if (cipherArr.length > 65)
         logger(
           chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is > 64  
+          Which is > 65
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
 
@@ -243,16 +243,16 @@ function decode(
         options.seed
       );
 
-      if (cipherArr.length < 64)
+      if (cipherArr.length < 65)
         logger(
           chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is < 64
+          Which is < 65
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
-      if (cipherArr.length > 64)
+      if (cipherArr.length > 65)
         logger(
           chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is > 64  
+          Which is > 65  
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
 
@@ -298,16 +298,16 @@ function decode(
         options.seed
       );
 
-      if (cipherArr.length < 64)
+      if (cipherArr.length < 65)
         logger(
           chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is < 64
+          Which is < 65
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
-      if (cipherArr.length > 64)
+      if (cipherArr.length > 65)
         logger(
           chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is > 64  
+          Which is > 65
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
 
