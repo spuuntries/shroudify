@@ -1,6 +1,6 @@
 const fs = require("fs"),
   chalk = require("chalk"),
-  pkg = require("./package.json"),
+  aes256 = require("aes256"),
   shuffleSeed = require("shuffle-seed"),
   _ = require("lodash"),
   ciphs = fs.readdirSync("./ciphers");
@@ -19,6 +19,7 @@ function logger(msg = "logging") {
  * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done, useful for injecting dead data.
  * @param {any} [options.seed] Shuffling seed.
  * @param {String} [options.writeFile] Path to write to.
+ * @param {String} [options.join] What to join the resulting strings with.
  * @return {String|Boolean} Encoded data or if it has written to file.
  */
 function encode(
@@ -28,6 +29,7 @@ function encode(
     rounds: 1,
     seed: 0,
     writeFile: undefined,
+    join: " ",
   }
 ) {
   (() => {
@@ -43,6 +45,9 @@ function encode(
     if (!options.writeFile) {
       options["writeFile"] = undefined;
     }
+    if (!options.join) {
+      options["join"] = " ";
+    }
     if (!_.isFinite(options.rounds)) {
       options["rounds"] = parseInt(options.rounds);
       if (options.rounds < 1) {
@@ -55,12 +60,10 @@ function encode(
   })();
 
   let cipherArr,
-    b64a = shuffleSeed.shuffle(
+    b64a =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".split(
         ""
       ),
-      options.seed
-    ),
     /** Base64 encoded data. */
     b64e = "";
 
@@ -68,12 +71,14 @@ function encode(
     try {
       cipherArr = shuffleSeed.shuffle(
         _.compact(
-          fs
-            .readFileSync(`./ciphers/${options.cipher}`)
-            .toString("utf8")
-            .split("\r")
-            .join("")
-            .split("\n")
+          _.uniq(
+            fs
+              .readFileSync(`./ciphers/${options.cipher}`)
+              .toString("utf8")
+              .split("\r")
+              .join("")
+              .split("\n")
+          )
         ),
         options.seed
       );
@@ -108,7 +113,7 @@ function encode(
       return b64e
         .split("")
         .map((e) => cipherArr[b64a.indexOf(e)])
-        .join(" ")
+        .join(options.join)
         .trim()
         .replace(/  +/g, " ");
     } catch (error) {
@@ -121,12 +126,14 @@ function encode(
     try {
       cipherArr = shuffleSeed.shuffle(
         _.compact(
-          fs
-            .readFileSync(options.cipher)
-            .toString("utf8")
-            .split("\r")
-            .join("")
-            .split("\n")
+          _.uniq(
+            fs
+              .readFileSync(options.cipher)
+              .toString("utf8")
+              .split("\r")
+              .join("")
+              .split("\n")
+          )
         ),
         options.seed
       );
@@ -161,7 +168,7 @@ function encode(
       return b64e
         .split("")
         .map((e) => cipherArr[b64a.indexOf(e)])
-        .join(" ")
+        .join(options.join)
         .trim()
         .replace(/  +/g, " ");
     } catch (error) {
@@ -182,6 +189,7 @@ function encode(
  * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done, useful for injecting dead data.
  * @param {any} [options.seed] Shuffling seed.
  * @param {String} [options.writeFile] Path to write to.
+ * @param {String} [options.split] What to split the strings with.
  * @return {String|Boolean} Encoded data or if it has written to file.
  */
 function decode(
@@ -191,6 +199,7 @@ function decode(
     rounds: 1,
     seed: 0,
     writeFile: undefined,
+    split: " ",
   }
 ) {
   (() => {
@@ -206,6 +215,9 @@ function decode(
     if (!options.writeFile) {
       options["writeFile"] = undefined;
     }
+    if (!options.split) {
+      options["split"] = " ";
+    }
     if (!_.isFinite(options.rounds)) {
       options["rounds"] = parseInt(options.rounds);
       if (options.rounds < 1) {
@@ -218,12 +230,10 @@ function decode(
   })();
 
   let cipherArr,
-    b64a = shuffleSeed.shuffle(
+    b64a =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".split(
         ""
       ),
-      options.seed
-    ),
     /** Encoded data */
     encoded,
     /** Base64 encoded data. */
@@ -233,12 +243,14 @@ function decode(
     try {
       cipherArr = shuffleSeed.shuffle(
         _.compact(
-          fs
-            .readFileSync(`./ciphers/${options.cipher}`)
-            .toString("utf8")
-            .split("\r")
-            .join("")
-            .split("\n")
+          _.uniq(
+            fs
+              .readFileSync(`./ciphers/${options.cipher}`)
+              .toString("utf8")
+              .split("\r")
+              .join("")
+              .split("\n")
+          )
         ),
         options.seed
       );
@@ -259,12 +271,12 @@ function decode(
       if (Buffer.isBuffer(input)) {
         encoded = input
           .toString("utf8")
-          .split(" ")
+          .split(options.split)
           .map((e) => b64a[cipherArr.indexOf(e)])
           .join("");
       } else {
         encoded = input
-          .split(" ")
+          .split(options.split)
           .map((e) => b64a[cipherArr.indexOf(e)])
           .join("");
       }
@@ -288,12 +300,14 @@ function decode(
     try {
       cipherArr = shuffleSeed.shuffle(
         _.compact(
-          fs
-            .readFileSync(options.cipher)
-            .toString("utf8")
-            .split("\r")
-            .join("")
-            .split("\n")
+          _.uniq(
+            fs
+              .readFileSync(options.cipher)
+              .toString("utf8")
+              .split("\r")
+              .join("")
+              .split("\n")
+          )
         ),
         options.seed
       );
@@ -314,12 +328,12 @@ function decode(
       if (Buffer.isBuffer(input)) {
         encoded = input
           .toString("utf8")
-          .split(" ")
+          .split(options.split)
           .map((e) => b64a[cipherArr.indexOf(e)])
           .join("");
       } else {
         encoded = input
-          .split(" ")
+          .split(options.split)
           .map((e) => b64a[cipherArr.indexOf(e)])
           .join("");
       }
