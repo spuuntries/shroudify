@@ -1,3 +1,7 @@
+# Multiverse
+.multi
+.multignore
+
 # Logs
 logs
 *.log
