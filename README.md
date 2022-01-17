@@ -18,17 +18,11 @@ Basically, it's text-based steganography, which means, hiding files/data in text
 
 Simple, first install the module in your project:  
 
-`npm i shroudify`  
-
-or  
-
-`yarn add shroudify`
+`npm i shroudify`  or  `yarn add shroudify`
 
 then import it:
 
-`const shroudify = require("shroudify")`
-
-> (I'm not sure if this will work with ES6, will update this after checking)
+`const shroudify = require("shroudify")` or `import * as shroudify from shroudify`
 
 There are two methods, `.encode(input, {options})` and `.decode(input, {options})`.
 

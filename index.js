@@ -18,7 +18,8 @@ const fs = require("fs"),
   aes256 = require("aes256"),
   shuffleSeed = require("shuffle-seed"),
   _ = require("lodash"),
-  ciphs = fs.readdirSync("./ciphers");
+  path = require("path"),
+  ciphs = fs.readdirSync(path.join(__dirname, "/ciphers"));
 
 // Who uses console.log smh LMFAO
 function logger(msg = "logging") {
@@ -32,6 +33,7 @@ function logger(msg = "logging") {
  * @param {Object} options Options object.
  * @param {String} [options.cipher] Cipher to use, can be a path or a premade cipher.
  * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done, useful for injecting dead data.
+ * @param {String} [options.key] Key to use for encryption.
  * @param {any} [options.seed] Shuffling seed.
  * @param {String} [options.writeFile] Path to write to.
  * @param {String} [options.join] What to join the resulting strings with.
@@ -47,6 +49,7 @@ function encode(
     join: " ",
   }
 ) {
+  var aes
   (() => {
     if (!options.cipher) {
       options["cipher"] = "kek";
@@ -54,6 +57,7 @@ function encode(
     if (!options.rounds) {
       options["rounds"] = 1;
     }
+    if (options.key) aes = aes256.createCipher(options.key);
     if (!options.seed) {
       options["seed"] = 0;
     }
@@ -88,7 +92,7 @@ function encode(
         _.compact(
           _.uniq(
             fs
-              .readFileSync(`./ciphers/${options.cipher}`)
+              .readFileSync(path.join(__dirname, `/ciphers/${options.cipher}`))
               .toString("utf8")
               .split("\r")
               .join("")
@@ -110,6 +114,8 @@ function encode(
           Which is > 65  
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
+
+      if (aes) input = aes.encrypt(input);
 
       for (let i = 1; i <= options.rounds; i++) {
         if (i == 1) {
@@ -166,6 +172,8 @@ function encode(
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
 
+      if (aes) input = aes.encrypt(input);
+
       for (let i = 1; i <= options.rounds; i++) {
         if (i == 1) {
           if (Buffer.isBuffer(input)) {
@@ -202,6 +210,7 @@ function encode(
  * @param {Object} options Options object.
  * @param {String} [options.cipher] Cipher to use, can be a path or a premade cipher.
  * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done, useful for injecting dead data.
+ * @param {String} [options.key] Key to use for decryption.
  * @param {any} [options.seed] Shuffling seed.
  * @param {String} [options.writeFile] Path to write to.
  * @param {String} [options.split] What to split the strings with.
@@ -217,6 +226,7 @@ function decode(
     split: " ",
   }
 ) {
+  var aes
   (() => {
     if (!options.cipher) {
       options["cipher"] = "kek";
@@ -224,6 +234,7 @@ function decode(
     if (!options.rounds) {
       options["rounds"] = 1;
     }
+    if (options.key) aes = aes256.createCipher(options.key);
     if (!options.seed) {
       options["seed"] = 0;
     }
@@ -260,7 +271,7 @@ function decode(
         _.compact(
           _.uniq(
             fs
-              .readFileSync(`./ciphers/${options.cipher}`)
+              .readFileSync(path.join(__dirname, `/ciphers/${options.cipher}`))
               .toString("utf8")
               .split("\r")
               .join("")
@@ -303,6 +314,8 @@ function decode(
           b64e = Buffer.from(b64e, "base64").toString("utf8");
         }
       }
+
+      if (options.key) b64e = aes.decrypt(b64e);
 
       return b64e;
     } catch (error) {
@@ -360,6 +373,8 @@ function decode(
           b64e = Buffer.from(b64e, "base64").toString("utf8");
         }
       }
+
+if (options.key) b64e = aes.decrypt(b64e);
 
       return b64e;
     } catch (error) {
