@@ -13,6 +13,8 @@
    limitations under the License.
   */
 
+const { isBuffer } = require("lodash");
+
 const fs = require("fs"),
   chalk = require("chalk"),
   aes256 = require("aes256"),
@@ -27,6 +29,33 @@ function logger(msg = "logging") {
 }
 
 /**
+ * Compress a string using zlib
+ *
+ * @param {String} input The string to compress
+ * @param {Number} level The compression level
+ * @returns {String} The compressed string
+ */
+function compress(input, level) {
+  let zlib = require("zlib");
+  return zlib.brotliCompressSync(input, { level: level }).toString("base64");
+}
+
+/**
+ * Decompress a string using zlib
+ *
+ * @param {String} input The string to decompress
+ * @param {Number} level The compression level
+ * @returns {String} The decompressed string
+ * P.S. level is useless here, but it's there for consistency
+ */
+function decompress(input, level) {
+  let zlib = require("zlib");
+  return zlib
+    .brotliDecompressSync(Buffer.from(input, "base64"), { level: level })
+    .toString();
+}
+
+/**
  * Encode data.
  *
  * @param {String|Buffer} input Data to encode.
@@ -34,6 +63,7 @@ function logger(msg = "logging") {
  * @param {String} [options.cipher] Cipher to use, can be a path or a premade cipher.
  * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done, useful for injecting dead data.
  * @param {String} [options.key] Key to use for encryption.
+ * @param {Number} [options.compression=0] Compression level, 0-9.
  * @param {any} [options.seed] Shuffling seed.
  * @param {String} [options.writeFile] Path to write to.
  * @param {String} [options.join] What to join the resulting strings with.
@@ -42,17 +72,18 @@ function logger(msg = "logging") {
 function encode(
   input,
   options = {
-    cipher: "kek",
+    cipher: "randomwords",
     rounds: 1,
+    compression: 0,
     seed: 0,
     writeFile: undefined,
     join: " ",
   }
 ) {
-  var aes
+  var aes;
   (() => {
     if (!options.cipher) {
-      options["cipher"] = "kek";
+      options["cipher"] = "randomwords";
     }
     if (!options.rounds) {
       options["rounds"] = 1;
@@ -115,6 +146,12 @@ function encode(
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
 
+      if (options.compression)
+        input = compress(
+          isBuffer(input) ? Buffer.from(input).toString("utf8") : input,
+          options.compression
+        );
+
       if (aes) input = aes.encrypt(input);
 
       for (let i = 1; i <= options.rounds; i++) {
@@ -172,6 +209,12 @@ function encode(
           Continuing may not be good idea as it can lead to unpredictable performance`)
         );
 
+      if (options.compression)
+        input = compress(
+          isBuffer(input) ? Buffer.from(input).toString("utf8") : input,
+          options.compression
+        );
+
       if (aes) input = aes.encrypt(input);
 
       for (let i = 1; i <= options.rounds; i++) {
@@ -211,6 +254,7 @@ function encode(
  * @param {String} [options.cipher] Cipher to use, can be a path or a premade cipher.
  * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done, useful for injecting dead data.
  * @param {String} [options.key] Key to use for decryption.
+ * @param {Number} [options.compression] Compression level, 0-9.
  * @param {any} [options.seed] Shuffling seed.
  * @param {String} [options.writeFile] Path to write to.
  * @param {String} [options.split] What to split the strings with.
@@ -219,17 +263,18 @@ function encode(
 function decode(
   input,
   options = {
-    cipher: "kek",
+    cipher: "randomwords",
     rounds: 1,
+    compression: 0,
     seed: 0,
     writeFile: undefined,
     split: " ",
   }
 ) {
-  var aes
+  var aes;
   (() => {
     if (!options.cipher) {
-      options["cipher"] = "kek";
+      options["cipher"] = "randomwords";
     }
     if (!options.rounds) {
       options["rounds"] = 1;
@@ -317,6 +362,8 @@ function decode(
 
       if (options.key) b64e = aes.decrypt(b64e);
 
+      if (options.compression) b64e = decompress(b64e, options.compression);
+
       return b64e;
     } catch (error) {
       logger(
@@ -374,7 +421,9 @@ function decode(
         }
       }
 
-if (options.key) b64e = aes.decrypt(b64e);
+      if (options.key) b64e = aes.decrypt(b64e);
+
+      if (options.compression) b64e = decompress(b64e, options.compression);
 
       return b64e;
     } catch (error) {

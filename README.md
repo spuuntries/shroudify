@@ -22,7 +22,7 @@ Simple, first install the module in your project:
 
 then import it:
 
-`const shroudify = require("shroudify")` or `import * as shroudify from shroudify`
+`const shroudify = require("shroudify")` or `import shroudify from shroudify`
 
 There are two methods, `.encode(input, {options})` and `.decode(input, {options})`.
 
@@ -37,6 +37,8 @@ The `options` object can contain any of these:
 - **Rounds**  
   The number of base64 encoding rounds to be done, good for injecting dead data, isn't _that_ useful to prevent brute-force, however.  
   In fact, this could even compromise the secrecy of the system by providing more data on the cipher itself.
+- **Key**  
+  The key to use for encryption. If set, the data will first be encrypted through AES-256 before being encoded.
 - **Seed**  
   The seed for shuffling the cipher wordlist.
 - **writeFile**  
