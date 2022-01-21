@@ -24,4 +24,3 @@ encoded = shroudify.encode("ee", { rounds: 1 });
 assert.strictEqual(encoded, "antimissile caroused vouchsafe digitizing")
 passing();
 
-logger("Testing 

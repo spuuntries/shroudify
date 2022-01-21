@@ -13,13 +13,12 @@
    limitations under the License.
   */
 
-const { isBuffer } = require("lodash");
-
 const fs = require("fs"),
   chalk = require("chalk"),
   aes256 = require("aes256"),
   shuffleSeed = require("shuffle-seed"),
   _ = require("lodash"),
+  { isBuffer } = require("lodash"),
   path = require("path"),
   ciphs = fs.readdirSync(path.join(__dirname, "/ciphers"));
 
