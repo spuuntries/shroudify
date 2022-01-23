@@ -12,6 +12,7 @@
     "chalk": "^4.0.0",
     "fs-extra": "^10.0.0",
     "lodash": "^4.17.21",
+    "shorter": "^0.3.1",
     "shuffle-seed": "^1.1.6"
   },
   "engines": {

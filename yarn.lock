@@ -67,10 +67,22 @@ lodash@^4.17.21:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
+nan@^2.11.0:
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.15.0.tgz#3f34a473ff18e15c1b5626b62903b5ad6e665fee"
+  integrity sha512-8ZtvEnA2c5aYCZYd1cvgdnU6cqwixRoYg70xPLWUws5ORTa/lnw+u4amixRS/Ac5U5mQVgp9pnlSUnbNWFaWZQ==
+
 seedrandom@^2.4.2:
   version "2.4.4"
   resolved "https://registry.yarnpkg.com/seedrandom/-/seedrandom-2.4.4.tgz#b25ea98632c73e45f58b77cfaa931678df01f9ba"
   integrity sha512-9A+PDmgm+2du77B5i0Ip2cxOqqHjgNxnBgglxLcX78A2D6c2rTo61z4jnVABpF4cKeDMDG+cmXXvdnqse2VqMA==
+
+shorter@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/shorter/-/shorter-0.3.1.tgz#d937234eeff0a58df4b9d46fa12623e8c9f92817"
+  integrity sha512-sjrss6SOboe/Ql7cowgZswsBtWxQMeP7Mogkxn+/WTRB40zINp/42hLESWG+yngx1hwZbv8IZFIVdyJ9w+K3+A==
+  dependencies:
+    nan "^2.11.0"
 
 shuffle-seed@^1.1.6:
   version "1.1.6"

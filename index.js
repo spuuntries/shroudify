@@ -50,7 +50,7 @@ function compress(input, level) {
 function decompress(input, level) {
   let zlib = require("zlib");
   return zlib
-    .brotliDecompressSync(Buffer.from(input, "base64"), { level: level })
+    .brotliCompressSync(Buffer.from(input, "base64"), { level: level })
     .toString();
 }
 
@@ -147,7 +147,7 @@ function encode(
 
       if (options.compression)
         input = compress(
-          isBuffer(input) ? Buffer.from(input).toString("utf8") : input,
+          isBuffer(input) ? input.toString("utf8") : input,
           options.compression
         );
 
@@ -174,8 +174,8 @@ function encode(
         .trim()
         .replace(/  +/g, " ");
     } catch (error) {
-      logger(
-        chalk.red.bold(`failed to encode!
+      throw new Error(
+        chalk.red.bold(`Failed to encode!
         Err: ${error}`)
       );
     }
@@ -210,7 +210,7 @@ function encode(
 
       if (options.compression)
         input = compress(
-          isBuffer(input) ? Buffer.from(input).toString("utf8") : input,
+          isBuffer(input) ? input.toString("utf8") : input,
           options.compression
         );
 
@@ -237,9 +237,9 @@ function encode(
         .trim()
         .replace(/  +/g, " ");
     } catch (error) {
-      logger(
-        chalk.red.bold(`failed to encode!
-      Err: ${error}`)
+      throw new Error(
+        chalk.red.bold(`Failed to encode!
+        Err: ${error}`)
       );
     }
   }
@@ -365,9 +365,9 @@ function decode(
 
       return b64e;
     } catch (error) {
-      logger(
-        chalk.red.bold(`failed to decode!
-          Err: ${error}`)
+      throw new Error(
+        chalk.red.bold(`Failed to decode!
+        Err: ${error}`)
       );
     }
   } else {
@@ -426,8 +426,8 @@ function decode(
 
       return b64e;
     } catch (error) {
-      logger(
-        chalk.red.bold(`failed to encode!
+      throw new Error(
+        chalk.red.bold(`Failed to decode!
         Err: ${error}`)
       );
     }
