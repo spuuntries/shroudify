@@ -5,17 +5,19 @@
   "main": "index.js",
   "repository": "https://github.com/spuuntries/shroudify",
   "author": "spuun",
-  "license": "apache-2.0",
+  "license": "Apache-2.0",
   "private": true,
   "dependencies": {
     "aes256": "^1.1.0",
     "chalk": "^4.0.0",
     "fs-extra": "^10.0.0",
     "lodash": "^4.17.21",
-    "shorter": "^0.3.1",
     "shuffle-seed": "^1.1.6"
   },
   "engines": {
     "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "license-compatibility-checker": "^0.3.5"
   }
 }
