@@ -2,6 +2,9 @@
 .multi
 .multignore
 
+# VS Code settings
+.vscode
+
 # Logs
 logs
 *.log

@@ -17,8 +17,10 @@ function compress(input, options) {
  * @returns {String} The decompressed string.
  */
 function decompress(input, options) {
-	return tsmaz.decompress(Buffer.from(input, "base64"))
+  return tsmaz.decompress(Buffer.from(input, "base64"));
 }
 
 module.exports = {
-	compress, decompress}
+  compress,
+  decompress,
+};

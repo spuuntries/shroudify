@@ -13,13 +13,19 @@
    limitations under the License.
   */
 
-const fs = require("fs"),
+const fs = require("fs-extra"),
   chalk = require("chalk"),
   aes256 = require("aes256"),
   shuffleSeed = require("shuffle-seed"),
   _ = require("lodash"),
   { isBuffer } = require("lodash"),
   path = require("path"),
+  comps = fs
+    .readdirSync(path.join(__dirname, "/compress"))
+    .map((e) => e.split(".")[0]),
+  encs = fs
+    .readdirSync(path.join(__dirname, "/encrypt"))
+    .map((e) => e.split(".")[0]),
   ciphs = fs.readdirSync(path.join(__dirname, "/ciphers"));
 
 // Who uses console.log smh LMFAO
@@ -113,135 +119,75 @@ function encode(
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".split(
         ""
       ),
+    ciPath,
     /** Base64 encoded data. */
     b64e = "";
 
-  if (ciphs.includes(options.cipher)) {
-    try {
-      cipherArr = shuffleSeed.shuffle(
-        _.compact(
-          _.uniq(
-            fs
-              .readFileSync(path.join(__dirname, `/ciphers/${options.cipher}`))
-              .toString("utf8")
-              .split("\r")
-              .join("")
-              .split("\n")
-          )
-        ),
-        options.seed
-      );
+  if (ciphs.includes(options.cipher))
+    ciPath = path.join(__dirname, "/ciphers/", options.cipher);
+  else ciPath = options.cipher;
 
-      if (cipherArr.length < 65)
-        logger(
-          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+  try {
+    cipherArr = shuffleSeed.shuffle(
+      _.compact(
+        _.uniq(
+          fs
+            .readFileSync(ciPath)
+            .toString("utf8")
+            .split("\r")
+            .join("")
+            .split("\n")
+        )
+      ),
+      options.seed
+    );
+
+    if (cipherArr.length < 65)
+      logger(
+        chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
           Which is < 65
           Continuing may not be good idea as it can lead to unpredictable performance`)
-        );
-      if (cipherArr.length > 65)
-        logger(
-          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+      );
+    if (cipherArr.length > 65)
+      logger(
+        chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
           Which is > 65  
           Continuing may not be good idea as it can lead to unpredictable performance`)
-        );
+      );
 
-      if (options.compression)
-        input = compress(
-          isBuffer(input) ? input.toString("utf8") : input,
-          options.compression
-        );
+    if (options.compression)
+      input = compress(
+        isBuffer(input) ? input.toString("utf8") : input,
+        options.compression
+      );
 
-      if (aes) input = aes.encrypt(input);
+    if (aes) input = aes.encrypt(input);
 
-      for (let i = 1; i <= options.rounds; i++) {
-        if (i == 1) {
-          if (Buffer.isBuffer(input)) {
-            b64e = input.toString("base64");
-          } else if (_.isPlainObject(input)) {
-            b64e = Buffer.from(JSON.stringify(input)).toString("base64");
-          } else {
-            b64e = Buffer.from(input).toString("base64");
-          }
+    for (let i = 1; i <= options.rounds; i++) {
+      if (i == 1) {
+        if (Buffer.isBuffer(input)) {
+          b64e = input.toString("base64");
+        } else if (_.isPlainObject(input)) {
+          b64e = Buffer.from(JSON.stringify(input)).toString("base64");
         } else {
-          b64e = Buffer.from(b64e).toString("base64");
+          b64e = Buffer.from(input).toString("base64");
         }
+      } else {
+        b64e = Buffer.from(b64e).toString("base64");
       }
-
-      return b64e
-        .split("")
-        .map((e) => cipherArr[b64a.indexOf(e)])
-        .join(options.join)
-        .trim()
-        .replace(/  +/g, " ");
-    } catch (error) {
-      throw new Error(
-        chalk.red.bold(`Failed to encode!
-        Err: ${error}`)
-      );
     }
-  } else {
-    try {
-      cipherArr = shuffleSeed.shuffle(
-        _.compact(
-          _.uniq(
-            fs
-              .readFileSync(options.cipher)
-              .toString("utf8")
-              .split("\r")
-              .join("")
-              .split("\n")
-          )
-        ),
-        options.seed
-      );
 
-      if (cipherArr.length < 65)
-        logger(
-          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is < 65
-          Continuing may not be good idea as it can lead to unpredictable performance`)
-        );
-      if (cipherArr.length > 65)
-        logger(
-          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is > 65
-          Continuing may not be good idea as it can lead to unpredictable performance`)
-        );
-
-      if (options.compression)
-        input = compress(
-          isBuffer(input) ? input.toString("utf8") : input,
-          options.compression
-        );
-
-      if (aes) input = aes.encrypt(input);
-
-      for (let i = 1; i <= options.rounds; i++) {
-        if (i == 1) {
-          if (Buffer.isBuffer(input)) {
-            b64e = input.toString("base64");
-          } else if (_.isPlainObject(input)) {
-            b64e = Buffer.from(JSON.stringify(input)).toString("base64");
-          } else {
-            b64e = Buffer.from(input).toString("base64");
-          }
-        } else {
-          b64e = Buffer.from(b64e).toString("base64");
-        }
-      }
-
-      return b64e
-        .split("")
-        .map((e) => cipherArr[b64a.indexOf(e)])
-        .join(options.join)
-        .trim()
-        .replace(/  +/g, " ");
-    } catch (error) {
-      throw new Error(
-        chalk.red.bold(`Failed to encode!
+    return b64e
+      .split("")
+      .map((e) => cipherArr[b64a.indexOf(e)])
+      .join(options.join)
+      .trim()
+      .replace(/  +/g, " ");
+  } catch (error) {
+    throw new Error(
+      chalk.red.bold(`Failed to encode!
         Err: ${error}`)
-      );
-    }
+    );
   }
 }
 
@@ -309,128 +255,69 @@ function decode(
     /** Base64 encoded data. */
     b64e = "";
 
-  if (ciphs.includes(options.cipher)) {
-    try {
-      cipherArr = shuffleSeed.shuffle(
-        _.compact(
-          _.uniq(
-            fs
-              .readFileSync(path.join(__dirname, `/ciphers/${options.cipher}`))
-              .toString("utf8")
-              .split("\r")
-              .join("")
-              .split("\n")
-          )
-        ),
-        options.seed
-      );
+  if (ciphs.includes(options.cipher))
+    ciPath = path.join(__dirname, "/ciphers/", options.cipher);
+  else ciPath = options.cipher;
 
-      if (cipherArr.length < 65)
-        logger(
-          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+  try {
+    cipherArr = shuffleSeed.shuffle(
+      _.compact(
+        _.uniq(
+          fs
+            .readFileSync(ciPath)
+            .toString("utf8")
+            .split("\r")
+            .join("")
+            .split("\n")
+        )
+      ),
+      options.seed
+    );
+
+    if (cipherArr.length < 65)
+      logger(
+        chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
           Which is < 65
           Continuing may not be good idea as it can lead to unpredictable performance`)
-        );
-      if (cipherArr.length > 65)
-        logger(
-          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
+      );
+    if (cipherArr.length > 65)
+      logger(
+        chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
           Which is > 65  
           Continuing may not be good idea as it can lead to unpredictable performance`)
-        );
-
-      if (Buffer.isBuffer(input)) {
-        encoded = input
-          .toString("utf8")
-          .split(options.split)
-          .map((e) => b64a[cipherArr.indexOf(e)])
-          .join("");
-      } else {
-        encoded = input
-          .split(options.split)
-          .map((e) => b64a[cipherArr.indexOf(e)])
-          .join("");
-      }
-
-      for (let i = 1; i <= options.rounds; i++) {
-        if (i == 1) {
-          b64e = Buffer.from(encoded, "base64").toString("utf8");
-        } else {
-          b64e = Buffer.from(b64e, "base64").toString("utf8");
-        }
-      }
-
-      if (options.key) b64e = aes.decrypt(b64e);
-
-      if (options.compression) b64e = decompress(b64e, options.compression);
-
-      return b64e;
-    } catch (error) {
-      throw new Error(
-        chalk.red.bold(`Failed to decode!
-        Err: ${error}`)
       );
+
+    if (Buffer.isBuffer(input)) {
+      encoded = input
+        .toString("utf8")
+        .split(options.split)
+        .map((e) => b64a[cipherArr.indexOf(e)])
+        .join("");
+    } else {
+      encoded = input
+        .split(options.split)
+        .map((e) => b64a[cipherArr.indexOf(e)])
+        .join("");
     }
-  } else {
-    try {
-      cipherArr = shuffleSeed.shuffle(
-        _.compact(
-          _.uniq(
-            fs
-              .readFileSync(options.cipher)
-              .toString("utf8")
-              .split("\r")
-              .join("")
-              .split("\n")
-          )
-        ),
-        options.seed
-      );
 
-      if (cipherArr.length < 65)
-        logger(
-          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is < 65
-          Continuing may not be good idea as it can lead to unpredictable performance`)
-        );
-      if (cipherArr.length > 65)
-        logger(
-          chalk.bold.yellowBright(`Warn: Cipher length is ${cipherArr.length}!
-          Which is > 65
-          Continuing may not be good idea as it can lead to unpredictable performance`)
-        );
-
-      if (Buffer.isBuffer(input)) {
-        encoded = input
-          .toString("utf8")
-          .split(options.split)
-          .map((e) => b64a[cipherArr.indexOf(e)])
-          .join("");
+    for (let i = 1; i <= options.rounds; i++) {
+      if (i == 1) {
+        b64e = Buffer.from(encoded, "base64").toString("utf8");
       } else {
-        encoded = input
-          .split(options.split)
-          .map((e) => b64a[cipherArr.indexOf(e)])
-          .join("");
+        b64e = Buffer.from(b64e, "base64").toString("utf8");
       }
-
-      for (let i = 1; i <= options.rounds; i++) {
-        if (i == 1) {
-          b64e = Buffer.from(encoded, "base64").toString("utf8");
-        } else {
-          b64e = Buffer.from(b64e, "base64").toString("utf8");
-        }
-      }
-
-      if (options.key) b64e = aes.decrypt(b64e);
-
-      if (options.compression) b64e = decompress(b64e, options.compression);
-
-      return b64e;
-    } catch (error) {
-      throw new Error(
-        chalk.red.bold(`Failed to decode!
-        Err: ${error}`)
-      );
     }
+
+    if (options.key) b64e = aes.decrypt(b64e);
+
+    if (options.compression) b64e = decompress(b64e, options.compression);
+
+    return b64e;
+  } catch (error) {
+    throw new Error(
+      chalk.red.bold(`Failed to decode!
+        Err: ${error}`)
+    );
   }
 }
 
