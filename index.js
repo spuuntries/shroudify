@@ -15,7 +15,6 @@
 
 const fs = require("fs-extra"),
   chalk = require("chalk"),
-  aes256 = require("aes256"),
   shuffleSeed = require("shuffle-seed"),
   _ = require("lodash"),
   { isBuffer } = require("lodash"),
@@ -34,41 +33,22 @@ function logger(msg = "logging") {
 }
 
 /**
- * Compress a string using zlib
- *
- * @param {String} input The string to compress
- * @param {Number} level The compression level
- * @returns {String} The compressed string
- */
-function compress(input, level) {
-  let zlib = require("zlib");
-  return zlib.brotliCompressSync(input, { level: level }).toString("base64");
-}
-
-/**
- * Decompress a string using zlib
- *
- * @param {String} input The string to decompress
- * @param {Number} level The compression level
- * @returns {String} The decompressed string
- * P.S. level is useless here, but it's there for consistency
- */
-function decompress(input, level) {
-  let zlib = require("zlib");
-  return zlib
-    .brotliCompressSync(Buffer.from(input, "base64"), { level: level })
-    .toString();
-}
-
-/**
  * Encode data.
  *
  * @param {String|Buffer} input Data to encode.
  * @param {Object} options Options object.
- * @param {String} [options.cipher] Cipher to use, can be a path or a premade cipher.
- * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done, useful for injecting dead data.
- * @param {String} [options.key] Key to use for encryption.
- * @param {Number} [options.compression=0] Compression level, 0-9.
+ * @param {String} [options.cipher] Cipher to use, can be a path or a provided
+ *     cipher.
+ * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done,
+ *     useful for injecting dead data.
+ * @param {Object} [options.encrypt] Encryption options.
+ * @param {String} [options.encrypt.provider] Encryption provider to use.
+ * @param {String} [options.encrypt.key] Encryption key.
+ * @param {Object} [options.compression] Compression options.
+ * @param {String} [options.compression.provider] Compression provider to use,
+ *     can be one of the provided ones, or a path.
+ * @param {Object} [options.compression.options={}] Compression options that
+ *     will get passed to the compression provider.
  * @param {any} [options.seed] Shuffling seed.
  * @param {String} [options.writeFile] Path to write to.
  * @param {String} [options.join] What to join the resulting strings with.
@@ -79,7 +59,6 @@ function encode(
   options = {
     cipher: "randomwords",
     rounds: 1,
-    compression: 0,
     seed: 0,
     writeFile: undefined,
     join: " ",
@@ -93,7 +72,6 @@ function encode(
     if (!options.rounds) {
       options["rounds"] = 1;
     }
-    if (options.key) aes = aes256.createCipher(options.key);
     if (!options.seed) {
       options["seed"] = 0;
     }
@@ -120,12 +98,16 @@ function encode(
         ""
       ),
     ciPath,
+    encryption,
+    compression,
     /** Base64 encoded data. */
     b64e = "";
 
-  if (ciphs.includes(options.cipher))
-    ciPath = path.join(__dirname, "/ciphers/", options.cipher);
-  else ciPath = options.cipher;
+  if (options.cipher) {
+    if (ciphs.includes(options.cipher))
+      ciPath = path.join(__dirname, "/ciphers/", options.cipher);
+    else ciPath = options.cipher;
+  }
 
   try {
     cipherArr = shuffleSeed.shuffle(
@@ -155,13 +137,27 @@ function encode(
           Continuing may not be good idea as it can lead to unpredictable performance`)
       );
 
-    if (options.compression)
-      input = compress(
-        isBuffer(input) ? input.toString("utf8") : input,
-        options.compression
-      );
+    if (options.compression) {
+      if (comps.includes(options.compression.provider))
+        compression = require(path.join(
+          __dirname,
+          "/compress/",
+          options.compression.provider
+        ));
+      else compression = require(options.compression.provider);
+      input = compression.compress(input, options.compression.options);
+    }
 
-    if (aes) input = aes.encrypt(input);
+    if (options.encrypt) {
+      if (encs.includes(options.encrypt.provider))
+        encryption = require(path.join(
+          __dirname,
+          "/encrypt/",
+          options.encrypt.provider
+        ));
+      else encryption = require(options.encrypt.provider);
+      input = encryption.encrypt(input, options.encrypt.key);
+    }
 
     for (let i = 1; i <= options.rounds; i++) {
       if (i == 1) {
@@ -196,10 +192,16 @@ function encode(
  *
  * @param {String|Buffer} input Data to encode.
  * @param {Object} options Options object.
- * @param {String} [options.cipher] Cipher to use, can be a path or a premade cipher.
- * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done, useful for injecting dead data.
- * @param {String} [options.key] Key to use for decryption.
- * @param {Number} [options.compression] Compression level, 0-9.
+ * @param {String} [options.cipher] Cipher to use, can be a path or a premade
+ *     cipher.
+ * @param {Number} [options.rounds=1] Number of Base64 encoding rounds done,
+ *     useful for injecting dead data.
+ * @param {Object} [options.decrypt] Decryption options.
+ * @param {String} [options.decrypt.provider] Decryption provider to use.
+ * @param {String} [options.decrypt.key] Decryption key.
+ * @param {Object} [options.compression] Compression options.
+ * @param {String} [options.compression.provider] Compression provider to use, can be one of the provided ones, or a path.
+ * @param {Object} [options.compression.options={}] Compression options that will get passed to the compression provider.
  * @param {any} [options.seed] Shuffling seed.
  * @param {String} [options.writeFile] Path to write to.
  * @param {String} [options.split] What to split the strings with.
@@ -210,7 +212,6 @@ function decode(
   options = {
     cipher: "randomwords",
     rounds: 1,
-    compression: 0,
     seed: 0,
     writeFile: undefined,
     split: " ",
@@ -252,12 +253,17 @@ function decode(
       ),
     /** Encoded data */
     encoded,
+    ciPath,
+    decryption,
+    compression,
     /** Base64 encoded data. */
     b64e = "";
 
-  if (ciphs.includes(options.cipher))
-    ciPath = path.join(__dirname, "/ciphers/", options.cipher);
-  else ciPath = options.cipher;
+  if (options.cipher) {
+    if (ciphs.includes(options.cipher))
+      ciPath = path.join(__dirname, "/ciphers/", options.cipher);
+    else ciPath = options.cipher;
+  }
 
   try {
     cipherArr = shuffleSeed.shuffle(
@@ -308,9 +314,27 @@ function decode(
       }
     }
 
-    if (options.key) b64e = aes.decrypt(b64e);
+    if (options.decrypt) {
+      if (options.decrypt.provider)
+        decryption = require(path.join(
+          __dirname,
+          "/encrypt/",
+          options.decrypt.provider
+        ));
+      else decryption = require(options.decrypt.provider);
+      b64e = decryption.decrypt(b64e, options.decrypt.key);
+    }
 
-    if (options.compression) b64e = decompress(b64e, options.compression);
+    if (options.compression) {
+      if (comps.includes(options.compression.provider))
+        compression = require(path.join(
+          __dirname,
+          "/compress/",
+          options.compression.provider
+        ));
+      else compression = require(options.compression.provider);
+      b64e = compression.decompress(b64e, options.compression.options);
+    }
 
     return b64e;
   } catch (error) {
@@ -321,4 +345,7 @@ function decode(
   }
 }
 
-module.exports = { encode, decode };
+module.exports = {
+  encode,
+  decode,
+};

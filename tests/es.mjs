@@ -77,13 +77,15 @@ try {
 
 logger("Testing encryption");
 try {
-  encoded = shroudify.encode("ee", {
-    key: "bigpp",
-  });
+  encoded = shroudify.encode("ee", {encryption: {
+    algorithm: "aes256",
+    key: "bigpp"
+  }});
   assert.strictEqual(
-    shroudify.decode(encoded, {
-      key: "bigpp",
-    }),
+    shroudify.decode(encoded, {encryption: {
+    algorithm: "aes256",
+    key: "bigpp"
+  }}),
     "ee"
   );
   passing();
@@ -94,7 +96,7 @@ try {
 logger("Testing compression");
 try {
   encoded = shroudify.encode("ee", {
-    compression: 9,
+    compression: { provider: "brotli" },
   });
   assert.strictEqual(
     encoded,

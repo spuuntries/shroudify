@@ -559,6 +559,11 @@ to-readable-stream@^1.0.0:
   resolved "https://registry.yarnpkg.com/to-readable-stream/-/to-readable-stream-1.0.0.tgz#ce0aa0c2f3df6adf852efb404a783e77c0475771"
   integrity sha512-Iq25XBt6zD5npPhlLVXGFN3/gyR2/qODcKNNyTMd4vbm39HUaOiAM4PMq0eMVC/Tkxz+Zjdsc55g9yyz+Yq00Q==
 
+twofish@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/twofish/-/twofish-1.0.1.tgz#3831dbb6b70ce91efbb1b9b995934b28e5e99e99"
+  integrity sha1-ODHbtrcM6R77sbm5lZNLKOXpnpk=
+
 type-fest@^0.20.2:
   version "0.20.2"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.20.2.tgz#1bf207f4b28f91583666cb5fbd327887301cd5f4"
