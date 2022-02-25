@@ -11,7 +11,7 @@
     "@remusao/smaz": "^1.9.1",
     "aes256": "^1.1.0",
     "chalk": "^4.0.0",
-    "cryptocipher": "^3.0.6",
+    "cryptocipher": "^3.1.0",
     "fs-extra": "^10.0.0",
     "lodash": "^4.17.21",
     "shuffle-seed": "^1.1.6",
