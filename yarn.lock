@@ -154,10 +154,10 @@ crypto-random-string@^2.0.0:
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-2.0.0.tgz#ef2a7a966ec11083388369baa02ebead229b30d5"
   integrity sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==
 
-cryptocipher@^3.0.6:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/cryptocipher/-/cryptocipher-3.0.6.tgz#d9ec4169ea6d20882eb962206b88e1ccdfd11fa6"
-  integrity sha512-LZXRaeLo4Rbp/D9KLp+xkeLLFdCHtWC9tsDPxqxF5RdgPdPO8zdWLDtDJWtSlESMALxSkaLkIw2rIdk211pIEw==
+cryptocipher@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/cryptocipher/-/cryptocipher-3.1.1.tgz#44b3a228a7c9b5827075f50811036083f06453ec"
+  integrity sha512-Tuv6EpyFyWKdoegVvyl8ziHZ9UvkuBcl4Km+H74S65KNv7ChqOG9Y+IVjPMUWnFrY72Ej/Lg3WoIkiDk9D0ZvQ==
 
 decompress-response@^3.3.0:
   version "3.3.0"
