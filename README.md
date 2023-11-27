@@ -67,6 +67,16 @@ ase don't use it in an unsuitable production environment._**
 
 ------
 
+## 😭 Contributing
+
+To set up a dev environment:
+
+1. Clone the repo
+2. Install dependencies on the root of the repo, use any node package manage you want...
+3. Import the thing from the entry point, i.e. `index.js`. So, e.g. `const shroudify = require("./index.js")`.
+
+------
+
 ## 📜 **License**
 
 Shroudify is licensed under `apache-2.0`, dew any project you'd like n habe fun!
